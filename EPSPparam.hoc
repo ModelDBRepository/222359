@@ -1,0 +1,84 @@
+objref EPSPrecord, EPSPshift, EPSPamp,preEPSP
+xopen("insertsyn.hoc")
+func EPSPparam(){								// tau1,tau2,weight
+	EPSPrecord=new Vector()
+	
+	IC.amp=0
+	
+	soma EPSPrecord.record(&v(.5))
+	weight=$1
+	numSyn=1
+	insertsynE(sSec,numSyn,200,$1,$2,$3,1200,1)							// remove synapses
+	
+	cinit()
+	run()
+	
+	if(stoprun==0){
+		EPSPshift=new Vector(EPSPrecord.size())								// with voltage offset for kinetics calculation
+		
+		BL=EPSPrecord.mean(1,199/dt)
+		peak=EPSPrecord.max(200/dt,500/dt)
+		x_peak=EPSPrecord.max_ind(200/dt,500/dt)
+		
+		amp=peak-BL
+		print "amplitude = ",amp
+		
+		one_over_e=exp(-1)*BL+(1-exp(-1))*peak
+		
+		for ii=0,EPSPrecord.size()-1{
+			EPSPshift.x[ii]=abs(EPSPrecord.x[ii]-one_over_e)
+		}
+		
+		t1=EPSPshift.min_ind(200/dt,x_peak)
+		t2=EPSPshift.min_ind(x_peak,700/dt)
+		
+		print "tau1 = ", t1*dt-200
+		print "tau2 = ", t2*dt-x_peak*dt
+	
+		return amp
+	}else{
+		print "abort"
+		return 0
+	}
+}
+
+
+func EPSPStim(){								// tau1,tau2,weight,dur,freq
+	EPSPrecord=new Vector()
+	objref EPSPamp,preEPSP
+	EPSPamp=new Vector($5)
+	preEPSP=new Vector($5+1)
+	
+	IC.amp=0
+	
+	soma EPSPrecord.record(&v(.5))
+	numSyn=1
+	insertsynE(sSec,numSyn,200,$1,$2,$3,200+$4,$5)
+	
+	cinit()
+	run()
+	if(stoprun==0){
+		EPSPshift=new Vector(EPSPrecord.size())
+		
+		BL=EPSPrecord.mean(1,199/dt)
+		meanDepol=EPSPrecord.mean(200/dt,(200+$4)/dt)-BL
+		amp1=EPSPrecord.max(200/dt,(200+1000/$5)/dt)-BL
+		amp2=EPSPrecord.max((200+1000/$5)/dt,(200+2000/$5)/dt)-BL
+		ampLast=EPSPrecord.max((200+$4-1000/$5)/dt,(200+$4)/dt)-BL
+
+		print "avg depolarization = ",meanDepol
+		print "last/first = ", ampLast/amp1
+		print "second/first = ", amp2/amp1
+		
+		for i=0,$5-1{
+			EPSPamp.x(i)=EPSPrecord.max((200+i*1000/$5)/dt,(200+(i+1)*1000/$5)/dt)-BL
+		}
+		for i=0,$5{
+			preEPSP.x(i)=EPSPrecord.x((199.975+i*1000/$5)/dt)
+		}	
+		return 1
+		
+	}else{
+		return 0
+	}
+}

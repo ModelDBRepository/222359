@@ -1,0 +1,92 @@
+objref SynB[10000]
+objref NC_rand[10000]
+objref NetS_rand[10000]
+objref rexp
+objref PoissonStimtimes[10000]
+
+
+objref APc,APrec
+
+nSyn=0
+
+
+proc insert_noise_Syn() {			// section, num, start,stop,deltaStim,seed
+	nSyn=0
+	objref SynB[10000]
+	objref rexp
+	objref PoissonStimtimes[10000]
+	
+	soma APc=new APCount(.5)
+	APrec=new Vector()
+	APc.thresh=-20
+	APc.record(APrec)
+	
+	rexp=new Random($6)
+	
+	num=$2
+	
+	A=0
+	forsec $o1{
+		for (x) A+=area(x)
+	}
+	
+	A_rem=A
+	num_rem=num
+	nSyn=0
+	
+	forsec $o1{
+		A_branch=0
+		for (x) A_branch+=area(x)
+		num_branch=int(num_rem*(A_branch/A_rem)+0.5)
+			
+		for i=1,num_branch {
+			nSyn+=1
+			
+			loc=i/((num_branch+1))
+			
+			SynB[nSyn]=new Exp2Syn_depress(loc)
+
+			SynB[nSyn].tau1=.01
+			SynB[nSyn].tau2=45
+			
+			SynB[nSyn].tau_recover=300
+			SynB[nSyn].attenuation=0.5
+			
+			SynB[nSyn].e=0	
+		}
+		
+		A_rem-=A_branch
+		num_rem-=num_branch
+	}
+	print nSyn
+	
+	rexp.negexp($5)
+	startstim=$3
+	stopstim=$4
+	stepstim=$5
+	
+	for i=1,num{
+		ii=0
+		PoissonStimtimes[i]=new Vector()
+				
+		newstim=rexp.repick()+startstim
+		if(newstim<=stopstim){
+			PoissonStimtimes[i].append(newstim)
+			newstim=PoissonStimtimes[i].x(ii)+rexp.repick()
+								
+			while(newstim<stopstim){
+				PoissonStimtimes[i].append(newstim)
+				ii+=1
+				newstim=PoissonStimtimes[i].x(ii)+.1+rexp.repick()
+			}
+		}
+
+		NetS_rand[i]=new VecStim()
+		NetS_rand[i].play(PoissonStimtimes[i])
+
+		NC_rand[i]=new NetCon(NetS_rand[i],SynB[i])
+		NC_rand[i].weight=9e-4
+		NC_rand[i].delay=0
+	}
+	cinit()
+}

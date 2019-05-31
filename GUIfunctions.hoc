@@ -1,0 +1,44 @@
+func singleEPSP(){													// generates a single glutamatergic EPSP
+	tau1=.01
+	tau2=45
+	weight=9e-4
+	
+	tstop=700
+	Graph[0].size(0,tstop,-80,-50)
+	EPSPparam(tau1,tau2,weight)
+	weight=0
+	insertsynE(sSec,0,200,1,1,0,200,1)
+	return 1
+}
+
+func repeatedEPSP(){												// generates glutamatergic EPSPs at 3 to 12 Hz
+																	// and calculates mean amplitude and first-to-last amplitude ratio
+	tau1=.01
+	tau2=45
+	weight=9e-4
+
+	tstop=1500
+	Graph[0].size(0,tstop,-80,-50)
+	stoprun=0
+	runInd=1
+	while(stoprun==0 && runInd<=4){
+		print "\n",3*runInd,"Hz"
+		EPSPStim(tau1,tau2,weight,1000,3*runInd)
+		runInd+=1
+	}
+	
+	weight=0
+	insertsynE(sSec,0,200,1,1,0,200,1)
+	return 1
+}
+
+func currentInj(){													// performs a somatic step-current injection with an amplitude given by the slider
+	IC.del=200
+	IC.dur=500
+	tstop=1000
+	Graph[0].size(0,tstop,-100,40)
+	cinit()
+	run()
+	return 1
+}
+		

@@ -1,0 +1,27 @@
+proc runBL(){
+	finitialize()
+	a=IC.amp
+	d=IC.del
+	du=IC.dur
+	
+	IC.amp=-.5
+	IC.del=-9e2
+	IC.dur=10
+	t=-1e3
+	dtsav=dt
+	dt=.1
+	while (t<-1e1){
+		fadvance()
+	}
+	dt=dtsav
+	t=0
+	IC.amp=a
+	IC.del=d
+	IC.dur=du
+}
+
+
+proc cinit(){
+	runBL()
+
+}

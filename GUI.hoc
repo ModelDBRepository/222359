@@ -1,0 +1,96 @@
+strdef ICString,InputString
+
+proc ControlPanel(){
+	SynBackground=8
+	SynSpeed=0
+	
+	ICString = "0 pA"
+	InputString = "0 %"
+	x=1
+	xpanel("MEC neuron",0)
+		//Celltype selection
+		xradiobutton("Pyramidal Cell","Parameters_PYR()",1)
+		xradiobutton("Stellate Cell","Parameters_STELLATE()")
+		xradiobutton("Fast-spiking interneuron","Parameters_IN()")
+				
+		xlabel("")
+		
+		//Step current injection
+		xlabel("Step current injection")
+		xslider(&IC.amp, -.5, .5, "sprint(ICString, \"%g pA\", IC.amp*1000)")
+		xvarlabel(ICString)
+		xbutton("Step current","currentInj_loc()")
+		xlabel("")
+		
+		//Synaptic input
+		xlabel("Synaptic input")
+		xbutton("Single EPSP","singleEPSP_loc()")
+		xbutton("Repeated EPSP","repeatedEPSP_loc()")
+		xlabel("")
+		xlabel("")
+		
+		//Realistic input
+		
+		xlabel("Realistic synaptic input")
+		xlabel("Strength of speed-tuned input")
+		xslider(&SynSpeed, 0, 150, "sprint(InputString, \"%g %\", SynSpeed)")
+		xvarlabel(InputString)
+		xlabel("")
+		xbutton("Unit 2","run_real_input_loc(SynBackground,SynBackground*SynSpeed/100,250000,\"unit2.dat\")")
+		xbutton("Unit 3","run_real_input_loc(SynBackground,SynBackground*SynSpeed/100,250000,\"unit3.dat\")")
+		xlabel("")
+		xbutton("Supplementary Unit 1","run_real_input_loc(SynBackground,SynBackground*SynSpeed/100,1500000,\"supplementaryUnit1.dat\")")
+		xbutton("Supplementary Unit 2","run_real_input_loc(SynBackground,SynBackground*SynSpeed/100,1500000,\"supplementaryUnit2.dat\")")
+		xlabel("")
+		xbutton("Random Unit 1","run_real_input_loc(SynBackground,SynBackground*SynSpeed/100,500000,\"randomUnit1.dat\")")
+		xbutton("Random Unit 2","run_real_input_loc(SynBackground,SynBackground*SynSpeed/100,500000,\"randomUnit2.dat\")")
+		
+		xlabel("")
+		xbutton("Stop","stopThisRun()")
+	xpanel(0)
+}
+
+proc currentInj_loc(){
+	stopThisRun()
+	currentInj()
+}
+
+proc singleEPSP_loc(){
+	stopThisRun()
+	IC.amp=0
+	ICString = "0 pA"
+	singleEPSP()
+}
+
+proc repeatedEPSP_loc(){
+	stopThisRun()
+	IC.amp=0
+	ICString = "0 pA"
+	repeatedEPSP()
+}
+
+proc run_real_input_loc(){
+	stopThisRun()
+	IC.amp=0
+	ICString = "0 pA"
+	print $1
+	print $2
+	run_real_input($1,$2,$3,$s4)
+	
+
+	objref SynB[10000]
+	objref SynR[10000]
+}
+
+proc stopThisRun(){
+	stoprun=1
+	weight=0
+	insertsynE(sSec,0,200,1,1,0,200,1)
+	
+	objref SynB[10000]
+	objref SynR[10000]
+}
+
+	
+
+

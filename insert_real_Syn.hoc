@@ -1,0 +1,59 @@
+objref SynR[10000]
+objref NCR[10000]
+objref NetSR[10000]
+objref realStimtimes
+objref sf
+
+objref APc,APrec
+
+nSyn=0
+
+
+proc insert_real_Syn() {			// section,number,filename
+	strdef unitdata
+	sprint(unitdata,"data/%s",$s3)
+	nSyn=0
+	
+	soma APc=new APCount(.5)
+	APrec=new Vector()
+	APc.thresh=-20
+	APc.record(APrec)
+	
+	num=$2
+	
+	A=0
+	forsec $o1{
+		for (x) A+=area(x)
+	}
+
+	nSyn=0
+	
+	forsec $o1{		
+		loc=0.5
+		
+		SynR[1]=new Exp2Syn_depress(loc)
+		
+		SynR[1].tau1=.01
+		SynR[1].tau2=45
+		SynR[1].tau_recover=300
+		SynR[1].attenuation=0.5
+		SynR[1].e=0	
+	}
+	
+	sf=new File()
+	sf.ropen(unitdata)
+
+	realStimtimes=new Vector()
+	realStimtimes.scanf(sf)
+	sf.close()
+
+
+	NetSR[1]=new VecStim()
+	NetSR[1].play(realStimtimes)
+
+	NCR[1]=new NetCon(NetSR[1],SynR[1])
+	NCR[1].weight=num*9e-4
+	NCR[1].delay=0
+	cinit()
+	
+}

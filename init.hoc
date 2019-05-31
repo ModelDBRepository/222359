@@ -1,0 +1,93 @@
+load_file("nrngui.hoc")
+
+objref sSec,dendSec,axonSec,sdSec,IC
+objref vSamp,dvSamp,dfile
+objref ICsteady									// for correcting Baseline potential during fitting
+
+objref SynE[10000]
+objref SynI[10000]
+objref NCE[10000]
+objref NCI[10000]
+objref NetSE[10000]
+objref NetSI[10000]
+
+xopen("cinit.hoc")
+xopen("morphology.hoc")
+xopen("Parameters.hoc")
+
+sSec=new SectionList()
+dendSec=new SectionList()
+axonSec=new SectionList()
+sdSec=new SectionList()
+
+vSamp=new Vector()
+dvSamp=new Vector()
+dfile=new File()
+
+soma sSec.append()
+dend dendSec.append()
+
+soma sdSec.append()
+dend sdSec.append()
+
+forsec sdSec{
+	insert nax
+	insert kap
+	insert kdr
+	insert hd
+}
+
+forall{
+	insert pas
+}
+
+soma{
+	IC=new IClamp(.5)
+	ICsteady=new IClamp(.5)
+}
+
+proc longIC(){
+	IC.amp=0.5
+	IC.dur=500
+	IC.del=100
+	tstop=700
+}
+
+proc shortIC(){
+	IC.amp=.8
+	IC.dur=3
+	IC.del=0
+	tstop=10
+}
+
+ICsteady.del=-1e4
+ICsteady.dur=2e4
+ICsteady.amp=0
+
+Parameters_PYR()
+
+tstop=700
+
+proc init() {
+	finitialize()
+	tSTOP=tstop
+	t=0
+	tstop=tSTOP
+}
+
+
+xopen("EPSPparam.hoc")
+xopen("insert_real_Syn.hoc")
+xopen("insert_noise_Syn.hoc")
+
+xopen("run_real_input.hoc")
+xopen("GUIfunctions.hoc")
+
+xopen("GUI.hoc")
+ControlPanel()
+
+xopen("voltage.ses")
+
+cinit()
+
+

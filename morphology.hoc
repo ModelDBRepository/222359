@@ -1,0 +1,14 @@
+create soma
+
+soma{
+	L=18.2
+	diam=18.2
+}
+
+create dend
+dend{
+	L=250
+	diam=1.5
+}
+
+connect dend(0),soma(1)

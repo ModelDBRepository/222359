@@ -1,0 +1,10 @@
+proc run_real_input(){				// density noise, density real,duration,filename
+
+	tstop=$3
+	Graph[0].size(0,tstop,-80,50)
+	insert_noise_Syn(dendSec,$1,0,$3,100,0)
+	insert_real_Syn(dendSec,$2,$s4)
+	
+	cinit()
+	run()
+}

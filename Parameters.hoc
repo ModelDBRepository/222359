@@ -1,0 +1,123 @@
+strdef celltype
+
+proc Parameters_PYR(){
+
+	celltype="Pyramidal cell"
+
+	Ra_global=150				/* internal resistivity in (ohm/cm) */
+	
+	cm_global=8.044 			/* specific membrane capacitance (uF/cm^2) */
+	Rm=5497.129					/* specific membrane resistivity (ohm*cm^2) */ 
+
+	gpas=1/Rm					/* passive conductance*/
+	eleak=-72
+	ghcn=4.47798e-5
+	
+	gnabar=0.025*(1.05^30)		/* sodium conductance (S/cm^2) ~0,1798 */
+	gkbar=0.025*(1.05^39)		/* potassium conductance ~1,4305 */
+	gkdr=0.025*(1.05^54)		/* inward rectifying potassium conductance ~1,0637 */
+
+	celsius=35
+	
+	setParameters()
+}
+
+
+proc Parameters_STELLATE(){
+
+	celltype="Stellate cell"
+
+	Ra_global=150				/* internal resistivity in (ohm/cm) */
+	cm_global=8.86977			/* specific membrane capacitance (uF/cm^2) */
+	Rm=3178.63					/* specific membrane resistivity (ohm*cm^2) */  
+
+	gpas=1/Rm					/* passive conductance*/
+	eleak=-68
+	
+	ghcn=3.2327e-4
+
+	gnabar=0.025*(1.05^45)		/* sodium conductance (S/cm^2) ~0,1798 */
+	gkbar=0.025*(1.05^55)		/* potassium conductance ~1,4305 */
+	gkdr=0.025*(1.05^44)		/* inward rectifying potassium conductance ~1,0637 */
+
+	celsius=35
+	
+	setParameters()
+}
+
+
+proc Parameters_IN(){
+
+	celltype="Fast-spiking interneuron"
+
+	Ra_global=150				/* internal resistivity in (ohm/cm) */
+	cm_global=3.0346			/* specific membrane capacitance (uF/cm^2) */
+	Rm=7528.7606				/* specific membrane resistivity (ohm*cm^2) */  
+
+	gpas=1/Rm					/* passive conductance*/
+	eleak=-78
+
+	gnabar=0.025*(1.05^18)		/* sodium conductance (S/cm^2) ~0,1798 */
+	gkbar=0.025*(1.05^55)		/* potassium conductance ~1,4305 */
+	gkdr=0.025*(1.05^49)		/* inward rectifying potassium conductance ~1,0637 */
+	
+	ghcn=2.0369e-5
+
+	celsius=35
+	
+	setParameters()
+}
+
+proc Parameters_otherIN(){
+
+	celltype="regular spiking interneuron"
+
+	Ra_global=150				/* internal resistivity in (ohm/cm) */
+	cm_global=3.202				/* specific membrane capacitance (uF/cm^2) */
+	Rm=11745.033				/* specific membrane resistivity (ohm*cm^2) */  
+
+	gpas=1/Rm					/* passive conductance*/
+	eleak=-71.0567
+
+	gnabar=.08					/* sodium conductance (S/cm^2) */
+	gkbar=.06					/* potassium conductance */
+	gkdr=.2						/* inward rectifying potassium conductance */
+	ghcn=3.3181e-5
+
+	celsius=35
+	
+	setParameters()
+}
+
+
+proc setParameters(){
+	
+	soma{
+		gbar_nax=gnabar
+		gkabar_kap=gkbar
+		gkdrbar_kdr=gkdr
+	
+		ghdbar_hd=ghcn
+		g_pas=gpas 
+		cm=cm_global
+	}
+	
+	dend{
+		gbar_nax=0
+		gkabar_kap=0
+		gkdrbar_kdr=0
+	
+		ghdbar_hd=ghcn
+		g_pas=gpas 
+		cm=cm_global
+	}
+	
+	forall{
+		e_pas=eleak Ra=Ra_global 
+	}
+	print celltype
+	
+	cinit()
+}
+		
+	

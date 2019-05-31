@@ -1,0 +1,36 @@
+nSyn=0
+
+proc insertsynE() {			// section, num, time, tau1,tau2,weight,stop,freq
+	nSyn=0
+	objref SynE[10000]
+	objref NCE[10000]
+	objref NetSE[10000]
+	forsec $o1{
+		
+		A=0
+		for (x) A+=area(x)
+		num=$2
+		for i=1,num {
+			
+			loc=i/((num+1))
+			NetSE[nSyn]=new NetStim(loc)
+			NetSE[nSyn].start=$3
+			NetSE[nSyn].number=int(($7-$3)/1000*$8)
+			NetSE[nSyn].interval=1000/$8
+			NetSE[nSyn].noise=0
+			
+			SynE[nSyn]=new Exp2Syn_depress(loc)
+			SynE[nSyn].tau1=$4
+			SynE[nSyn].tau2=$5
+			SynE[nSyn].tau_recover=300
+			SynE[nSyn].attenuation=0.5
+			SynE[nSyn].e=0			
+			
+			NCE[nSyn]=new NetCon(NetSE[nSyn],SynE[nSyn])
+			NCE[nSyn].weight=$6
+			NCE[nSyn].delay=0
+			nSyn+=1
+		}
+	}
+	cinit()
+}
